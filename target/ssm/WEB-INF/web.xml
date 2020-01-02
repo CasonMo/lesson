@@ -1,0 +1,55 @@
+<!DOCTYPE web-app PUBLIC
+ "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+ "http://java.sun.com/dtd/web-app_2_3.dtd" >
+
+
+<web-app>
+  <display-name>Archetype Created Web Application</display-name>
+<!--启动spring容器-->
+    <!--配置文件路径-->
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>classpath:applicationContext.xml</param-value>
+    </context-param>
+
+    <!--配置解决中文乱码的过滤器-->
+    <filter>
+        <filter-name>characterEncodingFilter</filter-name>
+        <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+        <init-param>
+            <param-name>encoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>characterEncodingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <!--配置spring的监听器-->
+  <listener>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+
+
+  <!--配置前端控制器-->
+  <servlet>
+    <servlet-name>dispatcherServlet</servlet-name><!--//dispatcherServlet这个名字可以随便取，只要和下面一致就可以了。-->
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class><!--//类的名称是固定的DispatcherServlet。只敲一个DispatcherServlet,然后自动导入-->
+    <init-param>
+      <!--初始化全局参数-->
+      <param-name>contextConfigLocation</param-name>
+      <param-value>classpath:springmvc.xml</param-value>
+      <!--加载类路径下的springmvc配置文件-->
+    </init-param>
+    <load-on-startup>1</load-on-startup>
+    <!--//servlet每次创建都会加载springmvc的配置文件-->
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>dispatcherServlet</servlet-name>
+    <url-pattern>/</url-pattern>
+    <!--//'/'表示任何请求都会请过这个servlet-->
+  </servlet-mapping>
+
+
+</web-app>

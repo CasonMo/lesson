@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mo.dao.ILessonDao">
+    <resultMap id="lessonTeacherClass" type="com.mo.domain.Lesson">
+        <id property="lesson_id" column="lesson_id" ></id>
+        <result property="name" column="name"></result>
+        <result property="limit" column="limit"></result>
+        <result property="selected" column="selected"></result>
+        <result property="teach_id" column="teach_id"></result>
+        <result property="teach_place" column="teach_place"></result>
+        <result property="class_id" column="class_id"></result>
+        <result property="teach_time" column="teach_time"></result>
+        <association property="teacher" column="teach_id" javaType="com.mo.domain.Teacher">
+            <id property="teach_id" column="teach_id" ></id>
+            <result property="name" column="tname"></result>
+        </association>
+
+        <collection property="students" ofType="com.mo.domain.Student">
+            <id property="stu_id" column="stu_id" ></id>
+            <result property="name" column="sname" ></result>
+            <result property="sex" column="sex" ></result>
+            <result property="class_id" column="class_id"></result>
+            <association property="aClass" column="class_id" javaType="com.mo.domain.Class_">
+                <id property="class_id" column="class_id" ></id>
+                <result property="name" column="cname"></result>
+                <result property="department" column="department"></result>
+            </association>
+        </collection>
+    </resultMap>
+
+    <select id="findAll" resultMap="lessonTeacherClass">
+        select l.*,t.name as tname ,c.name as cname from lesson l,teacher t,class c where c.class_id = l.class_id and l.teach_id = t.teach_id
+    </select>
+    <select id="findByStuId" resultMap="lessonTeacherClass" parameterType="String">
+      select lesson.lesson_id ,lesson.name,teacher.name as tname,teach_place ,teach_time ,limit ,selected,lesson.class_id  from  lesson,student,teacher
+		where teacher.teach_id = lesson.teach_id  and   lesson.class_id  like '%'+student.class_id+'%' and student.stu_id =#{stu_id}  and lesson.lesson_id not in (select lesson_id from selected,student where #{stu_id} = selected.stu_id)  group by lesson.name,lesson.lesson_id,teacher.name,lesson.teach_place
+,lesson.teach_time,lesson.limit,lesson.selected,lesson.class_id
+
+    </select>
+    <select id="findByStuIdByPage" resultMap="lessonTeacherClass" >
+          select top ${pageSize} lesson.lesson_id ,lesson.name,teacher.name as tname,teach_place ,teach_time ,limit ,selected,lesson.class_id  from  lesson,student,teacher
+		where teacher.teach_id = lesson.teach_id and   lesson.class_id  like '%'+student.class_id+'%' and student.stu_id =#{stu_id} and lesson.lesson_id not in (select lesson_id from selected,student where #{stu_id}= selected.stu_id) and lesson.lesson_id not in (select top ${preTotal} lesson_id from lesson)  group by lesson.name,lesson.lesson_id,teacher.name,lesson.teach_place
+   ,lesson.teach_time,lesson.limit,lesson.selected,lesson.class_id
+    </select>
+
+    <select id="findByStuIdAndSearch" resultMap="lessonTeacherClass" parameterType="String">
+      select lesson.lesson_id ,lesson.name,teacher.name as tname,teach_place ,teach_time ,limit ,selected,lesson.class_id  from  lesson,student,teacher
+		where teacher.teach_id = lesson.teach_id  and   lesson.class_id  like '%'+student.class_id+'%' and student.stu_id =#{stu_id}  and lesson.lesson_id not in (select lesson_id from selected,student where #{stu_id} = selected.stu_id) and (lesson.name like '%'+#{search}+'%' or teacher.name like '%'+#{search}+'%' or lesson.lesson_id like '%'+#{search}+'%' or lesson.teach_place like '%'+#{search}+'%' or lesson.teach_time  like '%'+#{search}+'%') group by lesson.name,lesson.lesson_id,teacher.name,lesson.teach_place
+,lesson.teach_time,lesson.limit,lesson.selected,lesson.class_id
+
+    </select>
+    <select id="findByStuIdByPageAndSearch" resultMap="lessonTeacherClass" >
+          select top ${pageSize} lesson.lesson_id ,lesson.name,teacher.name as tname,teach_place ,teach_time ,limit ,selected,lesson.class_id  from  lesson,student,teacher
+		where teacher.teach_id = lesson.teach_id and   lesson.class_id  like '%'+student.class_id+'%' and student.stu_id =#{stu_id} and lesson.lesson_id not in (select lesson_id from selected,student where #{stu_id}= selected.stu_id) and lesson.lesson_id not in (select top ${preTotal} lesson_id from lesson) and (lesson.name like '%'+#{search}+'%' or teacher.name like '%'+#{search}+'%' or lesson.lesson_id like '%'+#{search}+'%' or lesson.teach_place like '%'+#{search}+'%' or lesson.teach_time  like '%'+#{search}+'%')  group by lesson.name,lesson.lesson_id,teacher.name,lesson.teach_place
+   ,lesson.teach_time,lesson.limit,lesson.selected,lesson.class_id
+    </select>
+
+    <select id="findByTeachId" resultMap="lessonTeacherClass" parameterType="String">
+       select l.*,t.name as tname ,c.name as cname from lesson l,teacher t,class c where c.class_id = l.class_id and l.teach_id = t.teach_id and  l.teach_id = #{teachId}
+     </select>
+    <select id="findLessonSelectedByLessonIDAndTeachId" resultMap="lessonTeacherClass">
+       select l.lesson_id,l.limit,l.name,l.selected,l.teach_id,l.teach_place,l.teach_time,stu.stu_id,stu.name as sname,stu.sex,stu.class_id,c.name  as cname,c.department,t.teach_id,t.name as tname from lesson l  left outer join selected s on l.lesson_id = s.lesson_id
+        left join student stu on stu.stu_id = s.stu_id left outer join class c on c.class_id = stu.class_id   left outer join teacher t on t.teach_id = l.teach_id  where t.teach_id =#{teachId} and l.lesson_id =#{lessonId}
+    </select>
+    <select id="findLessonInfoByLessonIDAndTeachId" resultMap="lessonTeacherClass">
+        select l.*,c.class_id,c.name  as cname,c.department,t.teach_id,t.name as tname from lesson l  left outer join class c on c.class_id = l.class_id
+          left outer join teacher t on t.teach_id = l.teach_id  where t.teach_id =#{teachId} and l.lesson_id =#{lessonId}
+    </select>
+
+    <select id="saveLesson" resultType="String" parameterType="com.mo.domain.Lesson">
+        DECLARE	@result varchar(100)
+
+EXEC	 Proc_UploadCourse
+		@name = #{name},
+		@limit = #{limit},
+		@teach_id = #{teach_id},
+		@teach_place = #{teach_place},
+		@class_id = #{class_id},
+		@teach_time = #{teach_time},
+		@result = @result OUTPUT
+
+SELECT	@result as N'@result'
+    </select>
+</mapper>

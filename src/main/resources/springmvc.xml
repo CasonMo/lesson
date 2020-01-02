@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="
+      http://www.springframework.org/schema/mvc
+      http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+      http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans.xsd
+      http://www.springframework.org/schema/context
+      http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+
+    <!-- 只扫描带有controller注解的控制器 -->
+    <context:component-scan base-package="com.mo.controller" use-default-filters="false">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+    <!--视图解析器-->
+    <bean id="internalResourceViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <!--类名为InternalResourceViewResolver,id无所谓-->
+        <property name="prefix" value="/WEB-INF/pages/"/>
+        <!--路径-->
+        <property name="suffix" value=".jsp"/>
+        <!--后缀-->
+    </bean>
+
+    <!--<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">-->
+        <!--&lt;!&ndash;资源文件名&ndash;&gt;-->
+        <!--<property name="basename" value="classpath:ValidationMessages" />-->
+        <!--&lt;!&ndash;资源文件编码格式&ndash;&gt;-->
+        <!--<property name="defaultEncoding">-->
+            <!--<props>-->
+                <!--<prop key="classpath:ValErrMsg">UTF-8</prop>-->
+            <!--</props>-->
+        <!--</property>-->
+        <!--&lt;!&ndash;对资源文件内容缓存时间，单位秒&ndash;&gt;-->
+        <!--<property name="cacheSeconds" value="120" />-->
+    <!--</bean>-->
+    <!--验证器-->
+    <bean id="myValidator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
+        <property name="providerClass" value="org.hibernate.validator.HibernateValidator" />
+    </bean>
+    <!--自启动验证器-->
+    <mvc:annotation-driven validator="myValidator" />
+    <!--&lt;!&ndash; 配置文件解析器  上传文件配置 &ndash;&gt;-->
+    <!--<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">-->
+        <!--&lt;!&ndash; Maximum file size: 1MB &ndash;&gt;-->
+        <!--&lt;!&ndash; 1MB = 125000 Byte &ndash;&gt;-->
+        <!--<property name="maxUploadSize" value="125000"/>-->
+    <!--</bean>-->
+
+    <!--<bean id="sysExceptionResolver" class="exception.SysExceptionResolver" />-->
+
+    <!--配置拦截器-->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/**"/>
+            <mvc:exclude-mapping path="/check" />
+            <mvc:exclude-mapping path="/login" />
+            <mvc:exclude-mapping path="/sendMail" />
+            <mvc:exclude-mapping path="/register" />
+            <!--<mvc:exclude-mapping path="/student/**" />-->
+            <mvc:exclude-mapping path="/class/**" />
+            <mvc:exclude-mapping path="/studentCheck/**" />
+            <mvc:exclude-mapping path="/teacherCheck/**" />
+            <mvc:exclude-mapping path="/css/**" />
+            <mvc:exclude-mapping path="/js/**" />
+            <mvc:exclude-mapping path="/images/**" />
+            <mvc:exclude-mapping path="/getVerifyCode/**" />
+            <!--<mvc:exclude-mapping path="/logout" />-->
+            <bean class="com.mo.interceptor.MyInterceptor"/>
+        </mvc:interceptor>
+        <mvc:interceptor>
+            <mvc:mapping path="/student/**"/>
+            <bean class="com.mo.interceptor.StudentInterceptor"/>
+        </mvc:interceptor>
+        <mvc:interceptor>
+            <mvc:mapping path="/admin/**"/>
+            <bean class="com.mo.interceptor.AdminInterceptor"/>
+        </mvc:interceptor>
+        <mvc:interceptor>
+            <mvc:mapping path="/teacher/**"/>
+            <bean class="com.mo.interceptor.TeacherInterceptor"/>
+        </mvc:interceptor>
+        <mvc:interceptor>
+            <mvc:mapping path="/teacher/editLesson/**"/>
+            <mvc:mapping path="/teacher/deleteLesson/**"/>
+            <mvc:mapping path="/teacher/updateLesson/**"/>
+            <bean class="com.mo.interceptor.TeacherInterceptor2"/>
+        </mvc:interceptor>
+        <!--<mvc:interceptor>-->
+            <!--&lt;!&ndash;要拦截的方法 /** 全部拦截&ndash;&gt;-->
+            <!--<mvc:mapping path="/**"/>-->
+            <!--&lt;!&ndash;不要拦截的方法&ndash;&gt;-->
+            <!--&lt;!&ndash;<mvc:exclude-mapping path="" />&ndash;&gt;-->
+            <!--<bean  class="com.mo.interceptor.AutoFillURL" />-->
+        <!--</mvc:interceptor>-->
+        <!--<mvc:interceptor>-->
+            <!--&lt;!&ndash;要拦截的方法 /** 全部拦截&ndash;&gt;-->
+            <!--<mvc:mapping path="/user/**"/>-->
+            <!--&lt;!&ndash;不要拦截的方法&ndash;&gt;-->
+            <!--&lt;!&ndash;<mvc:exclude-mapping path="" />&ndash;&gt;-->
+            <!--<bean  class="interceptor.MyInterceptor2" />-->
+        <!--</mvc:interceptor>-->
+    </mvc:interceptors>
+
+
+
+    <!--开启springmvc框架注解的支持-->
+    <mvc:annotation-driven />
+
+    <!-- 前端控制器，过滤静态资源-->
+    <mvc:resources mapping="/js/**" location="/js/"/>
+    <mvc:resources mapping="/css/**" location="/css/"/>
+    <mvc:resources mapping="/images/**" location="/images/"/>
+</beans>

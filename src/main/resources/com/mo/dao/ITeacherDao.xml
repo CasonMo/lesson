@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mo.dao.ITeacherDao">
+    <resultMap id="teacherLessonMap" type="com.mo.domain.Teacher">
+        <id property="teach_id" column="teach_id"></id>
+        <result property="name" column="name"></result>
+        <result property="sex" column="sex"></result>
+        <result property="password" column="password"></result>
+        <collection property="lessons" ofType="com.mo.domain.Lesson">
+            <id property="lesson_id" column="lesson_id" ></id>
+            <result property="name" column="lname"></result>
+            <result property="limit" column="limit"></result>
+            <result property="selected" column="selected"></result>
+            <result property="teach_id" column="teach_id"></result>
+            <result property="teach_place" column="teach_place"></result>
+            <result property="class_id" column="class_id"></result>
+            <result property="teach_time" column="teach_time"></result>
+            <association property="class_" column="class_id" javaType="com.mo.domain.Class_">
+                <id property="class_id" column="class_id" ></id>
+                <result property="name" column="cname"></result>
+                <result property="department" column="department"></result>
+            </association>
+        </collection>
+    </resultMap>
+    <select id="find" resultType="com.mo.domain.Teacher">
+       select * from teacher where teach_id =#{id} and password = #{password}
+    </select>
+    <select id="findById" resultType="com.mo.domain.Teacher">
+       select * from teacher where teach_id =#{id}
+    </select>
+    <update id="update">
+        update teacher set name=#{name},password=#{password},sex = #{sex} where teach_id=#{teach_id}
+    </update>
+    <select id="findByTeachId" resultMap="teacherLessonMap" parameterType="String">
+       select t.teach_id,t.name,t.sex,l.class_id,l.lesson_id,l.limit,l.name as lname,l.selected,l.teach_place,l.teach_time,c.name as cname,c.department from teacher t left outer join lesson l on l.teach_id  = t.teach_id left outer join class c on c.class_id = l.class_id where t.teach_id = #{teachId}
+    </select>
+    <select id="AllTeacher" resultType="com.mo.domain.Teacher">
+       select * from teacher;
+    </select>
+</mapper>

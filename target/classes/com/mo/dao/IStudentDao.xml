@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mo.dao.IStudentDao">
+    <resultMap id="studentClassMap" type="com.mo.domain.Student">
+        <id property="stu_id" column="stu_id" ></id>
+        <result property="name" column="name" ></result>
+        <result property="password" column="password" ></result>
+        <result property="sex" column="sex" ></result>
+        <result property="class_id" column="class_id"></result>
+        <association property="aClass" column="class_id" javaType="com.mo.domain.Class_">
+            <id property="class_id" column="class_id" ></id>
+            <result property="department" column="department"></result>
+            <result property="name" column="cname" ></result>
+        </association>
+        <collection property="lessons" ofType="com.mo.domain.Lesson">
+            <id property="lesson_id" column="lesson_id"></id>
+            <result property="name" column="lname"></result>
+            <result property="teach_id" column="teach_id"></result>
+            <result property="teach_place" column="teach_place"></result>
+            <result property="class_id" column="class_id"></result>
+            <result property="teach_time" column="teach_time"></result>
+            <association property="teacher" column="teach_id" javaType="com.mo.domain.Teacher">
+                <id property="teach_id" column="teach_id" ></id>
+                <result property="name" column="tname"></result>
+            </association>
+        </collection>
+    </resultMap>
+    <select id="find" resultType="com.mo.domain.Student">
+       select * from student where stu_id =#{id} and password = #{password}
+    </select>
+    <select id="findAll" resultMap="studentClassMap" >
+        select stu.*,c.name as cname,c.department,l.lesson_id,l.name as lname,l.teach_id,t.name as tname,l.teach_place,l.teach_time from student stu  left outer join class c on c.class_id = stu.class_id left outer join selected s on s.stu_id = stu.stu_id
+        left join lesson l on l.lesson_id = s.lesson_id  left outer join teacher t on t.teach_id = l.teach_id
+         </select>
+    <select id="findById" resultMap="studentClassMap">
+       select s.*,c.department,c.name as cname from class c,student s where c.class_id = s.class_id and stu_id =#{id}
+    </select>
+    <update id="update">
+        update student set name=#{name},password=#{password},sex = #{sex} where stu_id=#{stu_id}
+    </update>
+    <select id="findStuIdSelectedLessonById" resultMap="studentClassMap" parameterType="String">
+       select stu.*,c.name as cname,c.department,l.lesson_id,l.name as lname,l.teach_id,t.name as tname,l.teach_place,l.teach_time from student stu  left outer join class c on c.class_id = stu.class_id left outer join selected s on s.stu_id = stu.stu_id
+        left join lesson l on l.lesson_id = s.lesson_id  left outer join teacher t on t.teach_id = l.teach_id  where stu.stu_id = #{stuId}
+    </select>
+    <select id="addStudent" resultType="String" parameterType="com.mo.domain.Student">
+       DECLARE	@result varchar(30)
+
+     EXEC	Proc_AddStudent
+             @id = #{stu_id},
+             @name = #{name},
+             @password = #{password},
+             @sex = #{sex},
+             @class_id = #{class_id},
+             @result = @result OUTPUT
+
+     SELECT	@result as N'@result'
+
+
+
+    </select>
+    <select id="findStudentByPage" resultMap="studentClassMap" >
+        select top ${pageSize} stu.*,c.department,c.name as cname from student stu left outer join class c on c.class_id = stu.class_id where stu_id not in (select top ${preTotal} stu_id  from student)
+         </select>
+    <select id="findAllStudentTemp" resultMap="studentClassMap" >
+       select stu.*,c.name as cname,c.department,l.lesson_id,l.name as lname,l.teach_id,t.name as tname,l.teach_place,l.teach_time from studentTemp stu  left outer join class c on c.class_id = stu.class_id left outer join selected s on s.stu_id = stu.stu_id
+        left join lesson l on l.lesson_id = s.lesson_id  left outer join teacher t on t.teach_id = l.teach_id  where stu.stu_id = #{stuId}
+         </select>
+    <select id="findAllStudentTempByPage" resultMap="studentClassMap" >
+       select top ${pageSize} stu.*,c.department,c.name as cname from studentTemp stu left outer join class c on c.class_id = stu.class_id where stu_id not in (select top ${preTotal} stu_id  from studentTemp)
+         </select>
+
+</mapper>
